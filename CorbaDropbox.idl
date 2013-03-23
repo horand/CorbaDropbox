@@ -1,0 +1,32 @@
+module CorbaDropbox {
+
+interface User
+	{
+		attribute string username;
+		attribute string password;
+		attribute boolean isLoggedIn;
+	};
+	
+	interface Document 
+	{
+		attribute string filename;
+		attribute User user;
+		attribute string contents;
+		attribute boolean isPrivate;
+	};
+
+	interface UserService
+	{	
+		boolean register (in string username, in string password);
+		User login (in string username, in string password);
+		string doclist(in User user);
+	};
+	
+	interface DocService
+	{
+		boolean uploadDoc(in string filename, in string contents, in boolean isPrivate, in User user); 
+		Document downloadDoc(in string filename, in User user);
+		boolean queryDocuments(in string filename, in User user);
+		string listDocuments( );
+	};
+};
