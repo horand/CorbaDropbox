@@ -15,6 +15,11 @@ interface User
 		attribute boolean isPrivate;
 	};
 
+	interface ClientCallback
+	{
+		void doCallback(in string msg);
+	};
+
 	interface UserService
 	{	
 		boolean register (in string username, in string password);
@@ -24,7 +29,7 @@ interface User
 	
 	interface DocService
 	{
-		boolean uploadDoc(in string filename, in string contents, in boolean isPrivate, in User user); 
+		boolean uploadDoc(in Document document, in ClientCallback updatedDoc); 
 		Document downloadDoc(in string filename, in User user);
 		boolean queryDocuments(in string filename, in User user);
 		string listDocuments( );
