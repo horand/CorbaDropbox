@@ -1,18 +1,18 @@
 module CorbaDropbox {
 
-interface User
+ 	struct User
 	{
-		attribute string username;
-		attribute string password;
-		attribute boolean isLoggedIn;
+		string username;
+		string password;
+		boolean isLoggedIn;
 	};
 	
-	interface Document 
+	struct Document 
 	{
-		attribute string filename;
-		attribute User user;
-		attribute string contents;
-		attribute boolean isPrivate;
+		string filename;
+		User user;
+		string contents;
+		boolean isPrivate;
 	};
 
 	interface ClientCallback
