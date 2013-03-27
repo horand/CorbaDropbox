@@ -1,11 +1,16 @@
 package corbaDropboxServer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import CorbaDropbox.ClientCallback;
 import CorbaDropbox.DocServiceOperations;
 import CorbaDropbox.Document;
 import CorbaDropbox.User;
 
 public class DocServiceServant implements DocServiceOperations{
+	
+	public Map<String,Document> docMap = new HashMap<String,Document>();
 
 	@Override
 	public Document downloadDoc(String filename, User user) {

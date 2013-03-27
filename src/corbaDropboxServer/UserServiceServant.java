@@ -1,10 +1,14 @@
 package corbaDropboxServer;
 
+import java.util.ArrayList;
+
 import CorbaDropbox.User;
 import CorbaDropbox.UserServiceOperations;
 
 public class UserServiceServant implements UserServiceOperations {
 
+	ArrayList<String> docList = new ArrayList<String>();
+	
 	@Override
 	public boolean register(String username, String password) {
 		// TODO Auto-generated method stub
