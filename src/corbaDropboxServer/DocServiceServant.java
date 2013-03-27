@@ -36,8 +36,24 @@ public class DocServiceServant implements DocServiceOperations{
 	@Override
 	public boolean uploadDoc(Document document, ClientCallback updatedDoc) {
 		// TODO Auto-generated method stub
-		//send up doc and send call back to subscribed users
+		String uploadFileName = document.filename;
+		
+		if(docMap.containsKey(uploadFileName)){
+			
+			return false;
+		} else {
+			
+			docMap.put(uploadFileName, document);
+			return true;
+		}
+	}
+	
+	//@Override
+	public boolean updateDoc(Document document, ClientCallback updatedDoc) {
+		// TODO Auto-generated method stub
+		
 		return false;
 	}
+	
 
 }
