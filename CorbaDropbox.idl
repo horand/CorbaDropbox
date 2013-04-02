@@ -24,7 +24,7 @@ module CorbaDropbox {
 	{	
 		boolean register (in string username, in string password);
 		User login (in string username, in string password);
-		string doclist(in User user);
+		
 	};
 	
 	interface DocService
@@ -33,5 +33,6 @@ module CorbaDropbox {
 		Document downloadDoc(in string filename, in User user);
 		boolean queryDocuments(in string filename, in User user);
 		string listDocuments( );
+		string doclist(in User user);
 	};
 };
