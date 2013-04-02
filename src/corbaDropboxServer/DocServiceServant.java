@@ -37,7 +37,7 @@ public class DocServiceServant implements DocServiceOperations{
 	}
 
 	@Override
-	public boolean uploadDoc(Document document, ClientCallback updatedDoc) {
+	public boolean uploadDoc(Document document) {
 		// TODO Auto-generated method stub
 		String uploadFileName = document.filename;
 		
@@ -51,7 +51,7 @@ public class DocServiceServant implements DocServiceOperations{
 		}
 	}
 	
-	//@Override
+	@Override
 	public boolean updateDoc(Document document, ClientCallback updatedDoc) {
 		// TODO Auto-generated method stub
 		
@@ -77,6 +77,4 @@ public class DocServiceServant implements DocServiceOperations{
 		}
 		return null;
 	}
-	
-
 }

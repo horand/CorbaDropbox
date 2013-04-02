@@ -1,16 +1,10 @@
 //David Horan - 09107771
 package corbaDropboxServer;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Scanner;
 
-import CorbaDropbox.Document;
 import CorbaDropbox.User;
 import CorbaDropbox.UserServiceOperations;
-import CorbaDropbox.DocService;
-import CorbaDropbox.DocServiceOperations;
 
 import java.util.HashMap;
 import java.util.Map;
