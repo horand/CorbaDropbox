@@ -1,4 +1,3 @@
-//David Horan - 09107771
 package corbaDropboxServer;
 
 import java.util.Scanner;
@@ -65,53 +64,54 @@ public class UserServiceServant implements UserServiceOperations {
 		//else please reenter username 
 		
 		System.out.println("Please enter your username: ");
-		username = input.toString();
+		//enteredUsername = input.toString();
 		
-		if(userMap.containsValue(username))
+		if(userMap.containsKey(username))
 		{
+			
 			User foundUser = userMap.get(username);
 			//String existingUser = foundUser.toString();
-			System.out.println("Please enter your password: ");
-			String enteredPassword = input.toString();
+			//System.out.println("Please enter your password: ");
+			//String enteredPassword = input.toString();
 			//how to find the password value in the user object
 			//String storedPassword = foundUser.nextElement();
 			
 			//for (Enumeration<E> e = foundUser.nextElement();)
-			if(enteredPassword == foundUser.password)
+			if(password == foundUser.password)
 			{
-				System.out.println("You are now logged in.");
+				//System.out.println("You are now logged in.");
+				return foundUser;
 			}
 			else
 			{
-				System.out.println("Incorrect password. Attempt 1 of 3. Please re-enter your password: ");
-				String enteredPassword2 = input.toString();
-				if(enteredPassword2 == foundUser.password)
-				{
-					System.out.println("You are now logged in.");
-				}
-				else
-				{
-					System.out.println("Incorrect password. Attempt 2 of 3. Please re-enter your password: ");
-					String enteredPassword3 = input.toString();
-					if(enteredPassword3 == foundUser.password)
-					{
-						System.out.println("You are now logged in.");
-					}
-					else
-					{
-						System.out.println("Incorrect password. Attempt 3 of 3.");
+				return null;
+//				System.out.println("Incorrect password. Attempt 1 of 3. Please re-enter your password: ");
+	//			String enteredPassword2 = input.toString();
+		//		if(enteredPassword2 == foundUser.password)
+			//	{
+				//	System.out.println("You are now logged in.");
+//				}
+	//			else
+		//		{
+			//		System.out.println("Incorrect password. Attempt 2 of 3. Please re-enter your password: ");
+				//	String enteredPassword3 = input.toString();
+					//if(enteredPassword3 == foundUser.password)
+//					{
+	//					System.out.println("You are now logged in.");
+		//			}
+			//		else
+				//	{
+					//	System.out.println("Incorrect password. Attempt 3 of 3.");
 						
-					}
-				}
+					//}
+				//}
 			}
 			//return type? 
 		}
 		else
 		{
-			//return false;
-			System.out.println("Username not found please try again: ");
-			
+			return null;
+			//System.out.println("Username not found please try again: ");	
 		}
-		return null;
 	}
 }

@@ -1,7 +1,6 @@
 package corbaDropboxServer;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -63,18 +62,20 @@ public class DocServiceServant implements DocServiceOperations{
 		// TODO Auto-generated method stub
 		//show all docs created by user
 		//find all doc's with user name matching logged in user and print filenames and privacy	
-		System.out.println("Please enter your username to view a list of all your documents: ");
-		String enteredUsername = input.toString();
+		//Iterate Map
+		//Check Object username
+		//If username matches username add to array
 		
-		Iterator entries = docMap.entrySet().iterator();
-		while (entries.hasNext()) {
-		    Map.Entry entry = (Map.Entry) entries.next();
-		    String value = entry.get(filename);
-		    if(value == enteredUsername)
-		    {
-		    	System.out.println(filename);
-		    }   
+		String docFilename = null;
+		for(int i = 0; i <= docMap.size(); i++)
+		{
+			Document doc = docMap.get(i);
+			
+			if(user == doc.user)
+			{
+				docFilename = doc.filename;
+			}
 		}
-		return null;
+		return docFilename;
 	}
 }
