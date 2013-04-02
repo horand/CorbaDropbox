@@ -3,6 +3,7 @@ package corbaDropboxServer;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import CorbaDropbox.Document;
@@ -119,20 +120,4 @@ public class UserServiceServant implements UserServiceOperations {
 		}
 		return null;
 	}
-
-	@Override
-	public String doclist(User user) {
-		// TODO Auto-generated method stub
-		//show all docs created by user
-		//find all doc's with user name matching logged in user and print filenames and privacy	
-		System.out.println("Please enter your username to view a list of all your documents: ");
-		String username = input.toString();
-		
-		if(docMap.containsValue(username))
-		{
-			System.out.println(filename);
-		}
-		return null;
-	}
-
 }
