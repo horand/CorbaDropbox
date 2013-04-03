@@ -1,5 +1,6 @@
 package corbaDropboxServer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -29,7 +30,7 @@ public class DocServiceServant implements DocServiceOperations{
 	}
 
 	@Override
-	public String listDocuments() {
+	public String[] listDocuments() {
 		// TODO Auto-generated method stub
 		//list all docs that are public
 		return null;
@@ -37,28 +38,45 @@ public class DocServiceServant implements DocServiceOperations{
 
 	@Override
 	public boolean uploadDoc(Document document) {
-		// TODO Auto-generated method stub
-		String uploadFileName = document.filename;
 		
-		if(docMap.containsKey(uploadFileName)){
-			
+		// check if uploaded document name is already in map
+		if(docMap.containsKey(document.filename)){
+		
+			// if it is return false to the client
 			return false;
+		
 		} else {
 			
-			docMap.put(uploadFileName, document);
+			// it is not already in the map add it to the map and return true
+			docMap.put(document.filename, document);
 			return true;
+		
 		}
 	}
 	
 	@Override
 	public boolean updateDoc(Document document, ClientCallback updatedDoc) {
-		// TODO Auto-generated method stub
-		
-		return false;
+	
+		// check if uploaded document name is already in map
+		if(docMap.containsKey(document.filename)){
+			
+			// if it is already in the map put the updated document into the map 
+			// and return true
+			docMap.put(document.filename, document);
+			updatedDoc.doCallback("Document "+document.filename+" has been updated");
+			return true;
+			
+		} else {
+			
+			// else it is not in the map already, so return false
+			return false;
+
+		}
+
 	}
 	
 	@Override
-	public String doclist(User user) {
+	public String[] listUserDocuments(User user) {
 		// TODO Auto-generated method stub
 		//show all docs created by user
 		//find all doc's with user name matching logged in user and print filenames and privacy	
@@ -66,16 +84,30 @@ public class DocServiceServant implements DocServiceOperations{
 		//Check Object username
 		//If username matches username add to array
 		
-		String docFilename = null;
-		for(int i = 0; i <= docMap.size(); i++)
+		// creates an array list that we can add any documents found to
+		ArrayList<String> fileList = new ArrayList<String>();
+		
+		for(Document d : docMap.values())
 		{
-			Document doc = docMap.get(i);
-			
-			if(user == doc.user)
+					
+			if(user == d.user)
 			{
-				docFilename = doc.filename;
+				fileList.add(d.filename);
 			}
 		}
-		return docFilename;
+		
+		int fileListLength = fileList.size();
+		
+		if (fileListLength > 0){
+		
+			String[] ListUserDocs = new String[fileListLength];
+			fileList.toArray(ListUserDocs);
+		
+			return ListUserDocs;
+			
+		} else {
+			return null;
+		
+		}
 	}
 }
