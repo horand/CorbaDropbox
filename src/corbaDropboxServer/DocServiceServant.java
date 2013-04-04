@@ -17,9 +17,10 @@ public class DocServiceServant implements DocServiceOperations{
 	
 	@Override
 	public Document downloadDoc(String filename, User user) {
-		// TODO Auto-generated method stub
-		//return doc with filename x if private and user == user ok 
+		
+		// check if the document exists for the user
 		return null;
+		
 	}
 
 	@Override
@@ -77,12 +78,6 @@ public class DocServiceServant implements DocServiceOperations{
 	
 	@Override
 	public String[] listUserDocuments(User user) {
-		// TODO Auto-generated method stub
-		//show all docs created by user
-		//find all doc's with user name matching logged in user and print filenames and privacy	
-		//Iterate Map
-		//Check Object username
-		//If username matches username add to array
 		
 		// creates an array list that we can add any documents found to
 		ArrayList<String> fileList = new ArrayList<String>();
