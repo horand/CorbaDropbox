@@ -1,7 +1,5 @@
 package corbaDropboxServer;
 
-import java.util.Scanner;
-
 import CorbaDropbox.User;
 import CorbaDropbox.UserServiceOperations;
 
@@ -11,107 +9,58 @@ import java.util.Map;
 public class UserServiceServant implements UserServiceOperations {
 
 	public Map<String,User> userMap = new HashMap<String,User>();
-	Scanner input = new Scanner(System.in);
+
 	
 	@Override
 	public boolean register(String username, String password) {
-		// TODO Auto-generated method stub
-		//create new user 
-		//print line "Please enter user requested username
-		//if username does not exist already proceed to password
-		//Please enter password for username
-		//confirm password and check with 1st attempt
-		//if matches all ok and log user in
-		//else please re enter password
-		//else username already exists please choose another username
-		//Try again
-		
-		System.out.println("Please enter your requested username: ");
-		username = input.toString();
-		
+
+		// check if username is already registered
 		if(userMap.containsValue(username))
 		{
-			//return true;
-			System.out.println("This username is already in use please enter new username: ");
+			// map already contains a user with the same username, return false
+
 			return false;
 		}
 		else
 		{
-			//return false;
-			System.out.println("Please enter a password: ");
-			password = input.toString();
-
+			// user doesn't already exist; create and add user to map and return true
 			User newUser = new User(username, password, false );
 			
 			userMap.put(username, newUser);
-			System.out.println("You are now a registered user. Thank you for registering with us.");
+
 			return true;
 		}
 	}
 
 	@Override
 	public User login(String username, String password) {
-		// TODO Auto-generated method stub
-		//check if user exists and if password matches
-		//print line please enter your username
-		//if username matches existing username please enter password
-			//if password matches username password log user in
-			//else please reenter password
-				//if password matches username password log user in
-				//else please reenter password
-					//if password matches username password log user in
-					//else return to beginning
-		//else please reenter username 
-		
-		System.out.println("Please enter your username: ");
-		//enteredUsername = input.toString();
-		
+
+		// check if the username exists in the map
 		if(userMap.containsKey(username))
 		{
-			
+			// get the user object from the map
 			User foundUser = userMap.get(username);
-			//String existingUser = foundUser.toString();
-			//System.out.println("Please enter your password: ");
-			//String enteredPassword = input.toString();
-			//how to find the password value in the user object
-			//String storedPassword = foundUser.nextElement();
-			
-			//for (Enumeration<E> e = foundUser.nextElement();)
+
+			// check if the password matches the supplied pass
 			if(password == foundUser.password)
 			{
-				//System.out.println("You are now logged in.");
-				return foundUser;
+				// set isLoggedIn variable to true if they match
+				foundUser.isLoggedIn = true;
+
 			}
 			else
 			{
-				return null;
-//				System.out.println("Incorrect password. Attempt 1 of 3. Please re-enter your password: ");
-	//			String enteredPassword2 = input.toString();
-		//		if(enteredPassword2 == foundUser.password)
-			//	{
-				//	System.out.println("You are now logged in.");
-//				}
-	//			else
-		//		{
-			//		System.out.println("Incorrect password. Attempt 2 of 3. Please re-enter your password: ");
-				//	String enteredPassword3 = input.toString();
-					//if(enteredPassword3 == foundUser.password)
-//					{
-	//					System.out.println("You are now logged in.");
-		//			}
-			//		else
-				//	{
-					//	System.out.println("Incorrect password. Attempt 3 of 3.");
-						
-					//}
-				//}
+				// set isLoggedIn variable to false if they don't match
+				foundUser.isLoggedIn = false;
+
 			}
-			//return type? 
+			// send back the validated or invalidated user 
+			return foundUser;
 		}
 		else
 		{
+			// return null for no user found.
 			return null;
-			//System.out.println("Username not found please try again: ");	
 		}
 	}
 }
