@@ -9,8 +9,16 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Scanner;
 
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NamingContextExt;
+import org.omg.CosNaming.NamingContextExtHelper;
+
+import CorbaDropbox.DocService;
+import CorbaDropbox.DocServiceHelper;
 import CorbaDropbox.Document;
 import CorbaDropbox.User;
+import CorbaDropbox.UserService;
+import CorbaDropbox.UserServiceHelper;
 
 public class Client  {
 
@@ -30,298 +38,314 @@ public class Client  {
 	
 	public static void main(String[] args){
 		
-		// TODO Corba Stuff Here
-		
-		
-		// Client UI Section
+		try{
+			ORB orb = ORB.init(args, null);
 
-		// variables
-		int option = 0;
+			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+					  
+	      // Use NamingContextExt instead of NamingContext. This is 
+	      // part of the Interoperable naming Service.  
+			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+				 
+	      // resolve the Object Reference in Naming
+	      String docName = "Documents";
+	      DocService docServ = DocServiceHelper.narrow(ncRef.resolve_str(docName));
 		
-		String selOption = "Please select an option from the above list: ";
-		String exitMsg = "Now exiting CorbaDropbox.";
-
-		User currentUser = null;
+	      String userName = "Users";
+	      UserService userServ = UserServiceHelper.narrow(ncRef.resolve_str(userName));
 		
-		Scanner keyIn = new Scanner(System.in);
+			// Client UI Section
 	
-		System.out.println(welcome);
-		displayUserMenu();
-		displayDocMenu();
+			// variables
+			int option = 0;
+			
+			String selOption = "Please select an option from the above list: ";
+			String exitMsg = "Now exiting CorbaDropbox.";
+	
+			User currentUser = null;
+			
+			Scanner keyIn = new Scanner(System.in);
 		
-		while (option != 6){
-			System.out.print(selOption);
-			option = keyIn.nextInt();
+			System.out.println(welcome);
+			displayUserMenu();
+			displayDocMenu();
 			
-			switch (option){
-			
-			case 1:
-				if (currentUser != null && currentUser.isLoggedIn){
-					System.out.print("User "+currentUser.username+" is already logged in");
-					displayDocMenu();
-					
-				} else {
-					System.out.print("Please select a username: ");
-					String regUser = keyIn.nextLine();
-					
-					System.out.print("Please select a password: ");
-					String regPass = keyIn.nextLine();
-					/*
-					if(userServ.register(regUser,regPass)){
-						System.out.println("User registration complete.");
-						
+			while (option != 6){
+				System.out.print(selOption);
+				option = keyIn.nextInt();
+				
+				switch (option){
+				
+				case 1:
+					if (currentUser != null && currentUser.isLoggedIn){
+						System.out.print("User "+currentUser.username+" is already logged in");
+						displayDocMenu();
 						
 					} else {
-						System.out.println("User could not be registered, please try again with a different username.");
-	
-					}
-					*/
-					displayUserMenu();
-				}
-				break;
-				
-			case 2:
-				if (currentUser != null && currentUser.isLoggedIn){
-					System.out.print("User "+currentUser.username+" is already logged in");
-					displayDocMenu();
-					
-				} else {
-				
-					System.out.print("Please enter your username: ");
-					String loginUser = keyIn.nextLine();
-					
-					System.out.print("Please enter your password: ");
-					String loginPass = keyIn.nextLine();
-					/*
-					currentUser = userServ.login(loginUser,loginPass);
-					*/
-					if(currentUser == null){
-						System.out.println("Unknown username");
-						displayUserMenu();
+						System.out.print("Please select a username: ");
+						String regUser = keyIn.nextLine();
 						
-					} else if (currentUser.isLoggedIn) {
-						System.out.println("Login Successful");
+						System.out.print("Please select a password: ");
+						String regPass = keyIn.nextLine();
+						
+						if(userServ.register(regUser,regPass)){
+							System.out.println("User registration complete.");
+							
+							
+						} else {
+							System.out.println("User could not be registered, please try again with a different username.");
+		
+						}
+						
+						displayUserMenu();
+					}
+					break;
+					
+				case 2:
+					if (currentUser != null && currentUser.isLoggedIn){
+						System.out.print("User "+currentUser.username+" is already logged in");
+						displayDocMenu();
+						
+					} else {
+					
+						System.out.print("Please enter your username: ");
+						String loginUser = keyIn.nextLine();
+						
+						System.out.print("Please enter your password: ");
+						String loginPass = keyIn.nextLine();
+						
+						currentUser = userServ.login(loginUser,loginPass);
+						
+						if(currentUser == null){
+							System.out.println("Unknown username");
+							displayUserMenu();
+							
+						} else if (currentUser.isLoggedIn) {
+							System.out.println("Login Successful");
+							displayDocMenu();
+						} else {
+							System.out.println("Login Unsuccessful");
+							displayUserMenu();
+						}
+						
+					}
+					break;
+	
+				case 3:
+					if(currentUser != null && currentUser.isLoggedIn){
+						System.out.print("Please enter file path and name to upload: ");
+						String filePath = keyIn.nextLine();
+						
+						try {
+							String fileContent = readFileAsString(filePath);
+							
+							System.out.print("Would you like to make this file public (y/n): ");
+							String privacyResp = keyIn.nextLine();
+							String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
+	
+							if (privacyResp.toLowerCase() == "y"){
+								boolean isPriv = true;
+								Document doc = new Document();
+								doc.filename = fileName;
+								doc.contents = fileContent;
+								doc.isPrivate = isPriv;
+								doc.user = currentUser;
+								
+								
+								if (docServ.uploadDoc(doc)){
+									System.out.println("Document uploaded successfully.");
+								} else {
+									System.out.println("No such document to be updated");
+								}
+								
+							} else if (privacyResp.toLowerCase() == "n"){
+								boolean isPriv = false;
+								Document doc = new Document();
+								doc.filename = fileName;
+								doc.contents = fileContent;
+								doc.isPrivate = isPriv;
+								doc.user = currentUser;
+								
+								
+								if (docServ.updateDoc(doc)){
+									System.out.println("Document uploaded successfully.");
+								} else {
+									System.out.println("A document with the same name already exists.");
+									System.out.println("Please try again with a different file name.");
+								}
+								
+							} else {
+								
+								System.out.println("Invalid response to file privacy option.");
+								System.out.println("Please try again.");
+								
+							}
+							
+						} catch (IOException e) {
+							
+							System.out.println("Something went wrong reading your file. :-(");
+							System.out.println("Please try again.");
+						}
+						
 						displayDocMenu();
 					} else {
-						System.out.println("Login Unsuccessful");
+						System.out.println("User not logged in");
+						displayUserMenu();
+					}
+					break;
+					
+				case 4:
+					if(currentUser != null && currentUser.isLoggedIn){
+						System.out.print("Please enter file path and name to update: ");
+						String filePath = keyIn.nextLine();
+						
+						try {
+							String fileContent = readFileAsString(filePath);
+							
+							System.out.print("Would you like to make this file public (y/n): ");
+							String privacyResp = keyIn.nextLine();
+							String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
+	
+							if (privacyResp.toLowerCase() == "y"){
+								boolean isPriv = true;
+								Document doc = new Document();
+								doc.filename = fileName;
+								doc.contents = fileContent;
+								doc.isPrivate = isPriv;
+								doc.user = currentUser;
+								
+								
+								if (docServ.updateDoc(doc)){
+									System.out.println("Document updated successfully.");
+								} else {
+									System.out.println("No such document to be updated");
+								}
+								
+							} else if (privacyResp.toLowerCase() == "n"){
+								boolean isPriv = false;
+								Document doc = new Document();
+								doc.filename = fileName;
+								doc.contents = fileContent;
+								doc.isPrivate = isPriv;
+								doc.user = currentUser;
+								
+								
+								if (docServ.updateDoc(doc)){
+									System.out.println("Document updated successfully.");
+								} else {
+									System.out.println("No such document to be updated");
+								}
+								
+							} else {
+								
+								System.out.println("Invalid response to file privacy option.");
+								System.out.println("Please try again.");
+								
+							}
+							
+						} catch (IOException e) {
+	
+							System.out.println("Something went wrong reading your file. :-(");
+							System.out.println("Please try again.");
+						}
+						
+						displayDocMenu();
+						
+					} else {
+						System.out.println("User not logged in");
+						displayUserMenu();
+					}
+					break;
+					
+				case 5:
+					if(currentUser != null && currentUser.isLoggedIn){
+						System.out.print("Please enter filename to subscribe to: ");
+						// TODO Add code to subscribe to file
+						displayDocMenu();
+					} else {
+						System.out.println("User not logged in");
+						displayUserMenu();
+					}
+					break;
+					
+				case 6:
+					if(currentUser != null && currentUser.isLoggedIn){
+						String[] myDocs = docServ.listUserDocuments(currentUser);
+						if (myDocs == null) {
+							
+							System.out.println("You do not have any documents.");
+							
+						} else {
+							System.out.println("FileName");
+							System.out.println(headerLine);
+							for (String s : myDocs) {
+								System.out.println(s);
+							}
+						}
+						displayDocMenu();
+					} else {
+						System.out.println("User not logged in");
+						displayUserMenu();
+					}
+					break;
+					
+				case 7:
+					if(currentUser != null && currentUser.isLoggedIn){
+						String[] pubDocs = docServ.listDocuments();
+						if (pubDocs == null) {
+							
+							System.out.println("You do not have any documents.");
+							
+						} else {
+							System.out.println("FileName");
+							System.out.println(headerLine);
+							for (String s : pubDocs) {
+								System.out.println(s);
+							}
+						}
+						displayDocMenu();
+					} else {
+						System.out.println("User not logged in");
+						displayUserMenu();
+					}
+					break;
+					
+				case 8:
+					if(currentUser != null && currentUser.isLoggedIn){
+						System.out.print("Please enter filename to download: ");
+						String downFileRef = keyIn.nextLine();
+						
+						Document downDoc = docServ.downloadDoc(downFileRef,currentUser);
+						
+						if(downDoc == null){
+							System.out.println("File does not exist, or you do not have access to the file.");
+						} else {
+							String downPath = "c:\\"+downDoc.filename;
+							
+							writeFileFromString(downPath, downDoc.contents);
+							
+							System.out.println("Your file has been downloaded to "+downPath);
+						}
+						displayDocMenu();
+					} else {
+						System.out.println("User not logged in");
 						displayUserMenu();
 					}
 					
+					break;
+								
+				case 9:
+					System.out.println(exitMsg);
+					break;
 				}
-				break;
-
-			case 3:
-				if(currentUser != null && currentUser.isLoggedIn){
-					System.out.print("Please enter file path and name to upload: ");
-					String filePath = keyIn.nextLine();
-					
-					try {
-						String fileContent = readFileAsString(filePath);
-						
-						System.out.print("Would you like to make this file public (y/n): ");
-						String privacyResp = keyIn.nextLine();
-						String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
-
-						if (privacyResp.toLowerCase() == "y"){
-							boolean isPriv = true;
-							Document doc = new Document();
-							doc.filename = fileName;
-							doc.contents = fileContent;
-							doc.isPrivate = isPriv;
-							doc.user = currentUser;
-							
-							//
-							//if (docServ.uploadDocument(doc)){
-							//	System.out.println("Document uploaded successfully.");
-							//} else {
-							//	System.out.println("No such document to be updated");
-							//}
-							
-						} else if (privacyResp.toLowerCase() == "n"){
-							boolean isPriv = false;
-							Document doc = new Document();
-							doc.filename = fileName;
-							doc.contents = fileContent;
-							doc.isPrivate = isPriv;
-							doc.user = currentUser;
-							
-							//
-							//if (docServ.updateDocument(doc)){
-							//	System.out.println("Document uploaded successfully.");
-							//} else {
-							//	System.out.println("A document with the same name already exists.");
-							//	System.out.println("Please try again with a different file name.");
-							//}
-							
-						} else {
-							
-							System.out.println("Invalid response to file privacy option.");
-							System.out.println("Please try again.");
-							
-						}
-						
-					} catch (IOException e) {
-						
-						System.out.println("Something went wrong reading your file. :-(");
-						System.out.println("Please try again.");
-					}
-					
-					displayDocMenu();
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				break;
-				
-			case 4:
-				if(currentUser != null && currentUser.isLoggedIn){
-					System.out.print("Please enter file path and name to update: ");
-					String filePath = keyIn.nextLine();
-					
-					try {
-						String fileContent = readFileAsString(filePath);
-						
-						System.out.print("Would you like to make this file public (y/n): ");
-						String privacyResp = keyIn.nextLine();
-						String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
-
-						if (privacyResp.toLowerCase() == "y"){
-							boolean isPriv = true;
-							Document doc = new Document();
-							doc.filename = fileName;
-							doc.contents = fileContent;
-							doc.isPrivate = isPriv;
-							doc.user = currentUser;
-							
-							//
-							//if (docServ.updateDocument(doc)){
-							//	System.out.println("Document updated successfully.");
-							//} else {
-							//	System.out.println("No such document to be updated");
-							//}
-							
-						} else if (privacyResp.toLowerCase() == "n"){
-							boolean isPriv = false;
-							Document doc = new Document();
-							doc.filename = fileName;
-							doc.contents = fileContent;
-							doc.isPrivate = isPriv;
-							doc.user = currentUser;
-							
-							//
-							//if (docServ.updateDocument(doc)){
-							//	System.out.println("Document updated successfully.");
-							//} else {
-							//	System.out.println("No such document to be updated");
-							//}
-							
-						} else {
-							
-							System.out.println("Invalid response to file privacy option.");
-							System.out.println("Please try again.");
-							
-						}
-						
-					} catch (IOException e) {
-
-						System.out.println("Something went wrong reading your file. :-(");
-						System.out.println("Please try again.");
-					}
-					
-					displayDocMenu();
-					
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				break;
-				
-			case 5:
-				if(currentUser != null && currentUser.isLoggedIn){
-					System.out.print("Please enter filename to subscribe to: ");
-					// TODO Add code to subscribe to file
-					displayDocMenu();
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				break;
-				
-			case 6:
-				if(currentUser != null && currentUser.isLoggedIn){
-					//String[] myDocs = docServ.listUserDocuments(currentUser);
-					//if (myDocs == null) {
-					//	
-					//	System.out.println("You do not have any documents.");
-					//	
-					//} else {
-					//	System.out.println("FileName");
-					//	System.out.println(headerLine);
-					//	for (String s : myDocs) {
-					//		System.out.println(s);
-					//	}
-					//}
-					displayDocMenu();
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				break;
-				
-			case 7:
-				if(currentUser != null && currentUser.isLoggedIn){
-					//String[] pubDocs = docServ.listDocuments();
-					//if (pubDocs == null) {
-					//	
-					//	System.out.println("You do not have any documents.");
-					//	
-					//} else {
-					//	System.out.println("FileName");
-					//	System.out.println(headerLine);
-					//	for (String s : pubDocs) {
-					//		System.out.println(s);
-					//	}
-					//}
-					displayDocMenu();
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				break;
-				
-			case 8:
-				if(currentUser != null && currentUser.isLoggedIn){
-					System.out.print("Please enter filename to download: ");
-					String downFileRef = keyIn.nextLine();
-					
-				//	Document downDoc = docServ.downloadDoc(downFileRef,currentUser);
-				//	
-				//	if(downDoc == null){
-				//		System.out.println("File does not exist, or you do not have access to the file.");
-				//	} else {
-				//		String downPath = "c:\\"+downDoc.filename;
-				//		
-				//		writeFileFromString(downPath, downDoc.contents);
-				//		
-				//		System.out.println("Your file has been downloaded to "+downPath);
-				//	}
-					displayDocMenu();
-				} else {
-					System.out.println("User not logged in");
-					displayUserMenu();
-				}
-				
-				break;
-							
-			case 9:
-				System.out.println(exitMsg);
-				break;
+	
 			}
-
+			
+			
+			keyIn.close();
+		} catch (Exception e) {
+			System.out.println("ERROR : " + e); e.printStackTrace(System.out);
 		}
-		
-		keyIn.close();
-		
 	}
 	
 	public static void displayUserMenu(){
@@ -385,6 +409,5 @@ public class Client  {
 		   try {writer.close();} catch (Exception ex) {}
 		}
 	// end of copied code	
-	}
-	
+	} 	
 }
