@@ -2,11 +2,16 @@ package corbaDropboxClient;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
@@ -55,7 +60,6 @@ public class Client  {
 	      UserService userServ = UserServiceHelper.narrow(ncRef.resolve_str(userName));
 		
 			// Client UI Section
-	
 			// variables
 			int option = 0;
 			
@@ -68,12 +72,11 @@ public class Client  {
 		
 			System.out.println(welcome);
 			displayUserMenu();
-			displayDocMenu();
 			
-			while (option != 6){
+			while (option != 9){
 				System.out.print(selOption);
 				option = keyIn.nextInt();
-				
+				keyIn.nextLine();
 				switch (option){
 				
 				case 1:
@@ -135,15 +138,16 @@ public class Client  {
 					if(currentUser != null && currentUser.isLoggedIn){
 						System.out.print("Please enter file path and name to upload: ");
 						String filePath = keyIn.nextLine();
-						
+						/*
 						try {
-							String fileContent = readFileAsString(filePath);
+						*/
+						String fileContent = "Fhgjfsdhgdjsflhgdfjkl"; //readFileAsString(filePath);
 							
-							System.out.print("Would you like to make this file public (y/n): ");
+							System.out.print("Would you like to make this file private (y/n): ");
 							String privacyResp = keyIn.nextLine();
 							String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
 	
-							if (privacyResp.toLowerCase() == "y"){
+							if (privacyResp.toLowerCase().equals("y")){
 								boolean isPriv = true;
 								Document doc = new Document();
 								doc.filename = fileName;
@@ -158,16 +162,14 @@ public class Client  {
 									System.out.println("No such document to be updated");
 								}
 								
-							} else if (privacyResp.toLowerCase() == "n"){
+							} else if (privacyResp.toLowerCase().equals("n")){
 								boolean isPriv = false;
 								Document doc = new Document();
 								doc.filename = fileName;
 								doc.contents = fileContent;
 								doc.isPrivate = isPriv;
-								doc.user = currentUser;
-								
-								
-								if (docServ.updateDoc(doc)){
+						
+								if (docServ.uploadDoc(doc)){
 									System.out.println("Document uploaded successfully.");
 								} else {
 									System.out.println("A document with the same name already exists.");
@@ -180,13 +182,13 @@ public class Client  {
 								System.out.println("Please try again.");
 								
 							}
-							
+							/*
 						} catch (IOException e) {
 							
 							System.out.println("Something went wrong reading your file. :-(");
 							System.out.println("Please try again.");
 						}
-						
+						*/
 						displayDocMenu();
 					} else {
 						System.out.println("User not logged in");
@@ -202,7 +204,7 @@ public class Client  {
 						try {
 							String fileContent = readFileAsString(filePath);
 							
-							System.out.print("Would you like to make this file public (y/n): ");
+							System.out.print("Would you like to make this file private (y/n): ");
 							String privacyResp = keyIn.nextLine();
 							String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
 	
@@ -221,7 +223,7 @@ public class Client  {
 									System.out.println("No such document to be updated");
 								}
 								
-							} else if (privacyResp.toLowerCase() == "n"){
+							} else if (privacyResp.toLowerCase().equals("n")){
 								boolean isPriv = false;
 								Document doc = new Document();
 								doc.filename = fileName;
@@ -239,13 +241,14 @@ public class Client  {
 							} else {
 								
 								System.out.println("Invalid response to file privacy option.");
-								System.out.println("Please try again.");
+					System.out.println("Please try again.");
 								
 							}
 							
 						} catch (IOException e) {
-	
+							
 							System.out.println("Something went wrong reading your file. :-(");
+
 							System.out.println("Please try again.");
 						}
 						
@@ -270,6 +273,7 @@ public class Client  {
 					
 				case 6:
 					if(currentUser != null && currentUser.isLoggedIn){
+						
 						String[] myDocs = docServ.listUserDocuments(currentUser);
 						if (myDocs == null) {
 							
@@ -366,29 +370,30 @@ public class Client  {
 		System.out.println(uploadOption);
 		System.out.println(updateOption);
 		System.out.println(subscribe);
+		System.out.println(viewOwnDocs);
+		System.out.println(viewPublicDocs);
 		System.out.println(downloadDocs);
 		System.out.println(exit);
 		System.out.println();
 	}
 	
 	/* The following method is taken from
-	 * http://stackoverflow.com/questions/1656797/how-to-read-a-file-into-string-in-java
+	 * http://stackoverflow.com/questions/326390/how-to-create-a-java-string-from-the-contents-of-a-file
 	 * accessed 08:46 05/04/2013
 	 * Title: How to read a file into string in java? - Stack Overflow
 	 */
-	private static String readFileAsString(String filePath) throws IOException {
-        StringBuffer fileData = new StringBuffer();
-        BufferedReader reader = new BufferedReader(
-                new FileReader(filePath));
-        char[] buf = new char[1024];
-        int numRead=0;
-        while((numRead=reader.read(buf)) != -1){
-            String readData = String.valueOf(buf, 0, numRead);
-            fileData.append(readData);
-        }
-        reader.close();
-        return fileData.toString();
-    }
+	private static String readFileAsString(String path) throws IOException {
+		  FileInputStream stream = new FileInputStream(new File(path));
+		  try {
+		    FileChannel fc = stream.getChannel();
+		    MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+		    /* Instead of using default, pass in a decoder. */
+		    return Charset.defaultCharset().decode(bb).toString();
+		  }
+		  finally {
+		    stream.close();
+		  }
+		}
 	// End of copied code
 
 	
@@ -401,7 +406,7 @@ public class Client  {
 		Writer writer = null;
 	
 		try {
-		    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+		    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath)));
 		    writer.write(fileContent);
 		} catch (IOException ex){
 		  // report

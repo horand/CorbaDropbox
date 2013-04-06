@@ -15,7 +15,7 @@ module CorbaDropbox {
 		boolean isPrivate;
 	};
 	
-	typedef sequence<string> docList;
+	
 	
 	interface ClientCallback
 	{
@@ -34,6 +34,7 @@ module CorbaDropbox {
 		boolean uploadDoc(in Document document); 
 		Document downloadDoc(in string filename, in User user);
 		boolean queryDocuments(in string filename, in User user);
+		typedef sequence<string> docList;
 		docList listDocuments( );
 		docList listUserDocuments(in User user);
 		boolean updateDoc(in Document document);

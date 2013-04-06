@@ -32,7 +32,9 @@ public class UserServiceServant implements UserServiceOperations {
 			// user doesn't already exist; create and add user to map and return true
 			User newUser = new User(username, password, false );
 			
+			
 			userMap.put(username, newUser);
+			
 
 			return true;
 		}
@@ -48,7 +50,7 @@ public class UserServiceServant implements UserServiceOperations {
 			User foundUser = userMap.get(username);
 
 			// check if the password matches the supplied pass
-			if(password == foundUser.password)
+			if(password.equals(foundUser.password))
 			{
 				// set isLoggedIn variable to true if they match
 				foundUser.isLoggedIn = true;

@@ -71,7 +71,7 @@ public class DocServiceServant implements DocServiceOperations{
 		}
 		else 
 		{
-			return null;
+			return new String[0];
 		}
 	}
 
@@ -121,7 +121,7 @@ public class DocServiceServant implements DocServiceOperations{
 		
 		for(Document d : docMap.values())
 		{		
-			if(user == d.user)
+			if(user.username.equals(d.user.username))
 			{
 				fileList.add(d.filename);
 			}
@@ -138,7 +138,7 @@ public class DocServiceServant implements DocServiceOperations{
 		} 
 		else 
 		{
-			return null;
+			return new String[0];
 		}
 	}
 
