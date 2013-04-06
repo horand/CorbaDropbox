@@ -17,10 +17,18 @@ public class DocServiceServant implements DocServiceOperations{
 	
 	@Override
 	public Document downloadDoc(String filename, User user) {
-		
-		// check if the document exists for the user
-		return null;
-		
+
+		Document d = docMap.get(filename);
+
+		// if the user is logged in and the file is public or the file belongs to the user download the doc
+		if((user.isLoggedIn && !d.isPrivate) || (user.isLoggedIn && d.user == user)) 
+		{
+			return d;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override
@@ -32,9 +40,32 @@ public class DocServiceServant implements DocServiceOperations{
 
 	@Override
 	public String[] listDocuments() {
-		// TODO Auto-generated method stub
-		//list all docs that are public
-		return null;
+		
+		ArrayList<String> docList = new ArrayList<String>();
+
+		for(Document d : docMap.values())
+		{
+			//If the document is public add it to the ArrayList
+			if(!d.isPrivate)
+			{
+				docList.add(d.filename);
+			}
+		}
+
+		int docListLength = docList.size();
+		
+		//Return the docList if populated
+		if(docListLength > 0)
+		{
+			String [] ListDocs = new String[docListLength];
+			docList.toArray(ListDocs);
+			
+			return ListDocs;
+		}
+		else 
+		{
+			return null;
+		}
 	}
 
 	@Override
@@ -59,19 +90,18 @@ public class DocServiceServant implements DocServiceOperations{
 	public boolean updateDoc(Document document, ClientCallback updatedDoc) {
 	
 		// check if uploaded document name is already in map
-		if(docMap.containsKey(document.filename)){
-			
+		if(docMap.containsKey(document.filename))
+		{	
 			// if it is already in the map put the updated document into the map 
 			// and return true
 			docMap.put(document.filename, document);
 			updatedDoc.doCallback("Document "+document.filename+" has been updated");
-			return true;
-			
-		} else {
-			
+			return true;	
+		} 
+		else 
+		{
 			// else it is not in the map already, so return false
 			return false;
-
 		}
 
 	}
@@ -83,8 +113,7 @@ public class DocServiceServant implements DocServiceOperations{
 		ArrayList<String> fileList = new ArrayList<String>();
 		
 		for(Document d : docMap.values())
-		{
-					
+		{		
 			if(user == d.user)
 			{
 				fileList.add(d.filename);
@@ -93,16 +122,16 @@ public class DocServiceServant implements DocServiceOperations{
 		
 		int fileListLength = fileList.size();
 		
-		if (fileListLength > 0){
-		
+		if (fileListLength > 0)
+		{
 			String[] ListUserDocs = new String[fileListLength];
 			fileList.toArray(ListUserDocs);
 		
-			return ListUserDocs;
-			
-		} else {
+			return ListUserDocs;	
+		} 
+		else 
+		{
 			return null;
-		
 		}
 	}
 }
