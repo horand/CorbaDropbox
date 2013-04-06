@@ -21,7 +21,7 @@ public class UserServiceServant implements UserServiceOperations {
 	public boolean register(String username, String password) {
 
 		// check if username is already registered
-		if(userMap.containsValue(username))
+		if(userMap.containsKey(username))
 		{
 			// map already contains a user with the same username, return false
 
