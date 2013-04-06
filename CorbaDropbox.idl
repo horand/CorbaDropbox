@@ -36,6 +36,6 @@ module CorbaDropbox {
 		boolean queryDocuments(in string filename, in User user);
 		docList listDocuments( );
 		docList listUserDocuments(in User user);
-		boolean updateDoc(in Document document, in ClientCallback updatedDoc);
+		boolean updateDoc(in Document document);
 	};
 };

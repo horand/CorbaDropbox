@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.omg.CORBA.ORB;
+
 import CorbaDropbox.ClientCallback;
 import CorbaDropbox.DocServiceOperations;
 import CorbaDropbox.Document;
@@ -13,7 +15,12 @@ import CorbaDropbox.User;
 public class DocServiceServant implements DocServiceOperations{
 	
 	public Map<String,Document> docMap = new HashMap<String,Document>();
-	Scanner input = new Scanner(System.in);
+		
+	private ORB orb;
+	
+	public void setORB(ORB orb_val){
+		this.orb = orb_val;
+	}
 	
 	@Override
 	public Document downloadDoc(String filename, User user) {
@@ -87,7 +94,7 @@ public class DocServiceServant implements DocServiceOperations{
 	}
 	
 	@Override
-	public boolean updateDoc(Document document, ClientCallback updatedDoc) {
+	public boolean updateDoc(Document document) {
 	
 		// check if uploaded document name is already in map
 		if(docMap.containsKey(document.filename))
@@ -95,7 +102,7 @@ public class DocServiceServant implements DocServiceOperations{
 			// if it is already in the map put the updated document into the map 
 			// and return true
 			docMap.put(document.filename, document);
-			updatedDoc.doCallback("Document "+document.filename+" has been updated");
+			
 			return true;	
 		} 
 		else 
@@ -134,4 +141,5 @@ public class DocServiceServant implements DocServiceOperations{
 			return null;
 		}
 	}
+
 }

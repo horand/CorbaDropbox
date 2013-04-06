@@ -6,10 +6,16 @@ import CorbaDropbox.UserServiceOperations;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.omg.CORBA.ORB;
+
 public class UserServiceServant implements UserServiceOperations {
 
 	public Map<String,User> userMap = new HashMap<String,User>();
-
+	private ORB orb;
+	
+	public void setORB(ORB orb_val){
+		this.orb = orb_val;
+	}
 	
 	@Override
 	public boolean register(String username, String password) {
