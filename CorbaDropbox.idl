@@ -39,4 +39,9 @@ module CorbaDropbox {
 		docList listUserDocuments(in User user);
 		boolean updateDoc(in Document document);
 	};
+	
+	interface MessageServer 
+ 	{
+  		void register(in ClientCallback ccb);
+ 	};
 };

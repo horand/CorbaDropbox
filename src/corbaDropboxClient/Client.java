@@ -15,15 +15,24 @@ import java.nio.charset.Charset;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
+
+import corbaDropboxServer.DocServiceServant;
 
 import CorbaDropbox.DocService;
 import CorbaDropbox.DocServiceHelper;
+import CorbaDropbox.DocServicePOATie;
 import CorbaDropbox.Document;
+import CorbaDropbox.MessageServer;
+import CorbaDropbox.MessageServerPOATie;
 import CorbaDropbox.User;
 import CorbaDropbox.UserService;
 import CorbaDropbox.UserServiceHelper;
+import CorbaDropbox.UserServicePOATie;
 
 public class Client  {
 
@@ -59,6 +68,35 @@ public class Client  {
 	      String userName = "Users";
 	      UserService userServ = UserServiceHelper.narrow(ncRef.resolve_str(userName));
 		
+	      // This section is used to set up message server for callbacks
+	   // Get reference to rootpoa & activate the POAManager
+	      POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+	      rootpoa.the_POAManager().activate();
+	      
+	      // create servant and register it with the ORB
+	      MessageServerServant mss = new MessageServerServant();
+	      mss.setORB(orb);
+	      
+	      
+	      
+	   // create a tie, with servant being the delegate.
+	      MessageServerPOATie mstie = new MessageServerPOATie(mss, rootpoa);
+	      
+
+	      // obtain the objectRef for the tie
+	      // this step also implicitly activates the 
+	      // the object
+	      MessageServer msref = mstie._this(orb);
+
+	      // bind the Object Reference in Naming
+	      String msname = "Messages";
+	      NameComponent cpath[] = ncRef.to_name( msname );
+	      ncRef.rebind(cpath, msref);
+	      
+	      
+	      
+	      
+	      
 			// Client UI Section
 			// variables
 			int option = 0;
@@ -125,6 +163,8 @@ public class Client  {
 							
 						} else if (currentUser.isLoggedIn) {
 							System.out.println("Login Successful");
+							ReadThread rt = new ReadThread(mss);
+							rt.run();
 							displayDocMenu();
 						} else {
 							System.out.println("Login Unsuccessful");
@@ -138,10 +178,10 @@ public class Client  {
 					if(currentUser != null && currentUser.isLoggedIn){
 						System.out.print("Please enter file path and name to upload: ");
 						String filePath = keyIn.nextLine();
-						/*
+						
 						try {
-						*/
-						String fileContent = "Fhgjfsdhgdjsflhgdfjkl"; //readFileAsString(filePath);
+						
+						String fileContent = readFileAsString(filePath);
 							
 							System.out.print("Would you like to make this file private (y/n): ");
 							String privacyResp = keyIn.nextLine();
@@ -159,7 +199,8 @@ public class Client  {
 								if (docServ.uploadDoc(doc)){
 									System.out.println("Document uploaded successfully.");
 								} else {
-									System.out.println("No such document to be updated");
+									System.out.println("A document with the same name already exists.");
+									System.out.println("Please try again with a different file name.");
 								}
 								
 							} else if (privacyResp.toLowerCase().equals("n")){
@@ -168,6 +209,7 @@ public class Client  {
 								doc.filename = fileName;
 								doc.contents = fileContent;
 								doc.isPrivate = isPriv;
+								doc.user = currentUser;
 						
 								if (docServ.uploadDoc(doc)){
 									System.out.println("Document uploaded successfully.");
@@ -182,13 +224,13 @@ public class Client  {
 								System.out.println("Please try again.");
 								
 							}
-							/*
+							
 						} catch (IOException e) {
 							
 							System.out.println("Something went wrong reading your file. :-(");
 							System.out.println("Please try again.");
 						}
-						*/
+						
 						displayDocMenu();
 					} else {
 						System.out.println("User not logged in");
@@ -208,7 +250,7 @@ public class Client  {
 							String privacyResp = keyIn.nextLine();
 							String fileName = filePath.substring(filePath.lastIndexOf('\\')+1, filePath.length());
 	
-							if (privacyResp.toLowerCase() == "y"){
+							if (privacyResp.toLowerCase().equals("y")){
 								boolean isPriv = true;
 								Document doc = new Document();
 								doc.filename = fileName;
@@ -324,7 +366,7 @@ public class Client  {
 						if(downDoc == null){
 							System.out.println("File does not exist, or you do not have access to the file.");
 						} else {
-							String downPath = "c:\\"+downDoc.filename;
+							String downPath = "c:\\Docs\\"+downDoc.filename;
 							
 							writeFileFromString(downPath, downDoc.contents);
 							

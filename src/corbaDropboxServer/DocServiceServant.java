@@ -28,7 +28,7 @@ public class DocServiceServant implements DocServiceOperations{
 		Document d = docMap.get(filename);
 
 		// if the user is logged in and the file is public or the file belongs to the user download the doc
-		if((user.isLoggedIn && !d.isPrivate) || (user.isLoggedIn && d.user == user)) 
+		if((user.isLoggedIn && !d.isPrivate) || (user.isLoggedIn && d.user.username.equals(user.username))) 
 		{
 			return d;
 		}
