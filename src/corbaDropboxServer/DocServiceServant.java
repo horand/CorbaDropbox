@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
 
-import CorbaDropbox.ClientCallback;
 import CorbaDropbox.DocServiceOperations;
 import CorbaDropbox.Document;
 import CorbaDropbox.User;
@@ -15,7 +14,7 @@ import CorbaDropbox.User;
 public class DocServiceServant implements DocServiceOperations{
 	
 	public Map<String,Document> docMap = new HashMap<String,Document>();
-		
+	private MessageServerServant msg = new MessageServerServant();	
 	private ORB orb;
 	
 	public void setORB(ORB orb_val){
@@ -24,17 +23,21 @@ public class DocServiceServant implements DocServiceOperations{
 	
 	@Override
 	public Document downloadDoc(String filename, User user) {
+		
+		if (docMap.containsKey(filename)){
+			Document d = docMap.get(filename);
+			if((user.isLoggedIn && !d.isPrivate) || (user.isLoggedIn && d.user.username.equals(user.username))) 
+			{
+				return d;
+			} else 
+			{
+				return new Document();
+			}
 
-		Document d = docMap.get(filename);
-
-		// if the user is logged in and the file is public or the file belongs to the user download the doc
-		if((user.isLoggedIn && !d.isPrivate) || (user.isLoggedIn && d.user.username.equals(user.username))) 
-		{
-			return d;
 		}
 		else
 		{
-			return null;
+			return new Document();
 		}
 	}
 
@@ -102,7 +105,7 @@ public class DocServiceServant implements DocServiceOperations{
 			// if it is already in the map put the updated document into the map 
 			// and return true
 			docMap.put(document.filename, document);
-			
+			msg.message(document.filename+" was updated.");
 			return true;	
 		} 
 		else 

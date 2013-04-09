@@ -9,6 +9,8 @@ import org.omg.PortableServer.POAHelper;
 
 import CorbaDropbox.DocService;
 import CorbaDropbox.DocServicePOATie;
+import CorbaDropbox.MessageServer;
+import CorbaDropbox.MessageServerPOATie;
 import CorbaDropbox.UserService;
 import CorbaDropbox.UserServicePOATie;
 
@@ -29,16 +31,21 @@ try{
 		      
 		      UserServiceServant uss = new UserServiceServant();
 		      uss.setORB(orb);
+		      
+		      MessageServerServant mss = new MessageServerServant();
+		      mss.setORB(orb);
 
 		      // create a tie, with servant being the delegate.
 		      DocServicePOATie dstie = new DocServicePOATie(dss, rootpoa);
 		      UserServicePOATie ustie = new UserServicePOATie(uss, rootpoa);
-
+		      MessageServerPOATie mstie = new MessageServerPOATie(mss, rootpoa);
+		      
 		      // obtain the objectRef for the tie
 		      // this step also implicitly activates the 
 		      // the object
 		      DocService dsref = dstie._this(orb);
 		      UserService usref = ustie._this(orb);
+		      MessageServer msref = mstie._this(orb);
 			    
 		      // get the root naming context
 		      org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
@@ -55,7 +62,14 @@ try{
 		      String uname = "Users";
 		      NameComponent epath[] = ncRef.to_name( uname );
 		      ncRef.rebind(epath, usref);
-
+		     /*
+		      String msname = "Messages";
+		      NameComponent mpath[] = ncRef.to_name( msname );
+		      ncRef.rebind(cpath, msref);
+		      
+		      ReadThread rt = new ReadThread(mss);
+		      rt.run();
+			*/	
 		      System.out.println("Server Running...");
 
 		      // wait for invocations from clients

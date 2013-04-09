@@ -14,13 +14,7 @@ module CorbaDropbox {
 		string contents;
 		boolean isPrivate;
 	};
-	
-	
-	
-	interface ClientCallback
-	{
-		void doCallback(in string msg);
-	};
+
 
 	interface UserService
 	{	
@@ -40,8 +34,15 @@ module CorbaDropbox {
 		boolean updateDoc(in Document document);
 	};
 	
+	 	interface Listener {
+	void message(in string msg);
+};
+ 	
+	
 	interface MessageServer 
  	{
-  		void register(in ClientCallback ccb);
+  		void register(in Listener lt);
  	};
+ 	
+
 };

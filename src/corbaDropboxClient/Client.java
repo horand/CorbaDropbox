@@ -1,11 +1,9 @@
 package corbaDropboxClient;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -15,24 +13,27 @@ import java.nio.charset.Charset;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
-import org.omg.CosNaming.NameComponent;
+
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
 
-import corbaDropboxServer.DocServiceServant;
+import corbaDropboxServer.ListenerServant;
+
 
 import CorbaDropbox.DocService;
 import CorbaDropbox.DocServiceHelper;
-import CorbaDropbox.DocServicePOATie;
 import CorbaDropbox.Document;
+import CorbaDropbox.Listener;
+import CorbaDropbox.ListenerHelper;
 import CorbaDropbox.MessageServer;
-import CorbaDropbox.MessageServerPOATie;
+import CorbaDropbox.MessageServerHelper;
+
 import CorbaDropbox.User;
 import CorbaDropbox.UserService;
 import CorbaDropbox.UserServiceHelper;
-import CorbaDropbox.UserServicePOATie;
+
 
 public class Client  {
 
@@ -67,34 +68,16 @@ public class Client  {
 		
 	      String userName = "Users";
 	      UserService userServ = UserServiceHelper.narrow(ncRef.resolve_str(userName));
-		
-	      // This section is used to set up message server for callbacks
-	   // Get reference to rootpoa & activate the POAManager
-	      POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
-	      rootpoa.the_POAManager().activate();
-	      
-	      // create servant and register it with the ORB
-	      MessageServerServant mss = new MessageServerServant();
-	      mss.setORB(orb);
-	      
-	      
-	      
-	   // create a tie, with servant being the delegate.
-	      MessageServerPOATie mstie = new MessageServerPOATie(mss, rootpoa);
-	      
+		/*
+	      String MsgName = "Messages";
+	      MessageServer MsgServ = MessageServerHelper.narrow(ncRef.resolve_str(MsgName));
 
-	      // obtain the objectRef for the tie
-	      // this step also implicitly activates the 
-	      // the object
-	      MessageServer msref = mstie._this(orb);
+	      ListenerServant ls  = new ListenerServant();
+	      POA rootPOA = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
 
-	      // bind the Object Reference in Naming
-	      String msname = "Messages";
-	      NameComponent cpath[] = ncRef.to_name( msname );
-	      ncRef.rebind(cpath, msref);
-	      
-	      
-	      
+	      rootPOA.activate_object(ls);
+	      Listener lstnr = ListenerHelper.narrow(rootPOA.servant_to_reference(ls));
+		 */
 	      
 	      
 			// Client UI Section
@@ -102,7 +85,7 @@ public class Client  {
 			int option = 0;
 			
 			String selOption = "Please select an option from the above list: ";
-			String exitMsg = "Now exiting CorbaDropbox.";
+			String exitMsg = "Now exiting CorbaDropbox. Have a nice day.";
 	
 			User currentUser = null;
 			
@@ -163,8 +146,6 @@ public class Client  {
 							
 						} else if (currentUser.isLoggedIn) {
 							System.out.println("Login Successful");
-							ReadThread rt = new ReadThread(mss);
-							rt.run();
 							displayDocMenu();
 						} else {
 							System.out.println("Login Unsuccessful");
@@ -305,7 +286,7 @@ public class Client  {
 				case 5:
 					if(currentUser != null && currentUser.isLoggedIn){
 						System.out.print("Please enter filename to subscribe to: ");
-						// TODO Add code to subscribe to file
+						// MsgServ.register(lstnr);
 						displayDocMenu();
 					} else {
 						System.out.println("User not logged in");
@@ -363,7 +344,7 @@ public class Client  {
 						
 						Document downDoc = docServ.downloadDoc(downFileRef,currentUser);
 						
-						if(downDoc == null){
+						if(downDoc.user == null){
 							System.out.println("File does not exist, or you do not have access to the file.");
 						} else {
 							String downPath = "c:\\Docs\\"+downDoc.filename;
@@ -430,7 +411,9 @@ public class Client  {
 		    FileChannel fc = stream.getChannel();
 		    MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
 		    /* Instead of using default, pass in a decoder. */
+		    stream.close();
 		    return Charset.defaultCharset().decode(bb).toString();
+		    
 		  }
 		  finally {
 		    stream.close();
